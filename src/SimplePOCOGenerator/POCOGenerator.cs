@@ -7,7 +7,7 @@ namespace SimplePOCOGenerator
     public static class POCOGenerator
     {
         public static string GenerateClass (Func<IDbConnection> connectionOpener,
-            string tableName, string nameSpace, string className)
+            string tableName, string nameSpace)
         {
             ValidateInput(connectionOpener, tableName, nameSpace);  
             
@@ -27,7 +27,7 @@ namespace SimplePOCOGenerator
                     {
                         if (writeClass)
                         {
-                            WriteNameSpaceAndClass(nameSpace, className, sb, row);
+                            WriteNameSpaceAndClass(nameSpace, sb, row);
                             writeClass = false;
                         }  
                         WriteProperty(row, sb);
@@ -55,16 +55,14 @@ namespace SimplePOCOGenerator
             if (!nameSpace.HasContext()) throw new ArgumentNullException(nameof(nameSpace));
         }
 
-        private static void WriteNameSpaceAndClass(string nameSpace, string className, StringBuilder sb, DataRow row)
+        private static void WriteNameSpaceAndClass(string nameSpace, StringBuilder sb, DataRow row)
         {
             sb.AppendLine(@"using System;");
             sb.AppendLine();
             sb.AppendLine($"namespace {nameSpace}");
             sb.AppendLine("{");
 
-            string name = className.HasContext()
-                ? className
-                : (string)row["BaseTableName"];
+            string name = (string)row["BaseTableName"];
             sb.AppendFormat("\tpublic class {0}{1}", name, Environment.NewLine);
             sb.AppendLine("\t{");
         }

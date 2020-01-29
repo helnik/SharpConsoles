@@ -1,7 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+
 
 namespace SimplePOCOGenerator
 {
@@ -15,23 +18,23 @@ namespace SimplePOCOGenerator
                 .AddJsonFile("appsettings.json", true, true)
                 .Build();
 
-            string tableName = config.GetSection("tableName")?.Value;
-            string outputClassName = config.GetSection("outputClassName")?.Value;
+            var tableNames = config.GetSection("tableNames").Get<List<string>>();
 
-            string poco = POCOGenerator.GenerateClass(() =>
+            foreach (var tableName in tableNames)
             {
-                var c = new SqlConnection(config.GetSection("connectionString")?.Value);
-                c.Open();
-                return c;
-            }, tableName, config.GetSection("namespace")?.Value, outputClassName);
+                string poco = POCOGenerator.GenerateClass(() =>
+                {
+                    var c = new SqlConnection(config.GetSection("connectionString")?.Value);
+                    c.Open();
+                    return c;
+                }, tableName, config.GetSection("namespace")?.Value);
 
-            string fileName = outputClassName.HasContext() ? outputClassName : tableName;
-            using (var outputFile = new StreamWriter(Path.Combine(directory, $"{fileName}.cs")))
-            {
-                outputFile.Write(poco); 
+                using (var outputFile = new StreamWriter(Path.Combine(directory, $"{tableName}.cs")))
+                {
+                    outputFile.Write(poco);
+                }
             }
 
-            Console.WriteLine(poco);
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
