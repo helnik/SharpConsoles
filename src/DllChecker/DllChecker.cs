@@ -8,9 +8,8 @@ namespace DllChecker
     //https://www.hanselman.com/blog/HowToProgrammaticallyDetectIfAnAssemblyIsCompiledInDebugOrReleaseMode.aspx
     public static class DllChecker
     {
-        public static string ScanDirectory(string sDir)
+        public static string ScanDirectory(string sDir, StringBuilder sb)
         {
-            var sb = new StringBuilder();
             foreach (string file in Directory.GetFiles(sDir, "*.dll"))
             {
                 InspectFile(file, sb);
@@ -27,7 +26,7 @@ namespace DllChecker
                     InspectFile(file, sb);
                 }
 
-                ScanDirectory(directory);
+                ScanDirectory(directory, sb);
             }
 
             return sb.ToString();
